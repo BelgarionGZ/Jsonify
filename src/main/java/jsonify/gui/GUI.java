@@ -3,7 +3,7 @@ package jsonify.gui;
 import java.awt.BorderLayout;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
-import java.awt.GridBagLayout;
+import java.awt.GridLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
@@ -44,13 +44,10 @@ public class GUI {
 		topPanel.add(comboBox);
 	}
 	
-	private void addScrollPanel() {
-		scrollPanel = new JScrollPane(bottomPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
-		scrollPanel.setBorder(null);
-	}
-	
 	private void addTextArea() {
 		textArea = new JTextArea();
+		textArea.setLineWrap(true);
+		textArea.setWrapStyleWord(true);
 		textArea.setText("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.");
 	
 		bottomPanel.add(textArea);
@@ -88,10 +85,12 @@ public class GUI {
 	
 	private void createBottomPanel() {
 		bottomPanel = new JPanel();
-		bottomPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
-		bottomPanel.setLayout(new GridBagLayout());
-		
-		mainPanel.add(bottomPanel, BorderLayout.SOUTH);
+		bottomPanel.setLayout(new GridLayout());
+	}
+	
+	private void createBottomPanelScroll() {
+		scrollPanel = new JScrollPane(bottomPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		mainPanel.add(scrollPanel, BorderLayout.CENTER);
 	}
 	
 	private void createMainPanel() {
@@ -99,15 +98,15 @@ public class GUI {
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		mainPanel.setLayout(new BorderLayout());
 		
-		frame.getContentPane().add(mainPanel);
+		frame.add(mainPanel);
 	}
 	
 	private void createTopPanel() {
 		topPanel = new JPanel();
-		topPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
+		topPanel.setBorder(BorderFactory.createTitledBorder("Select site"));
 		topPanel.setLayout(new FlowLayout());
 		
-		mainPanel.add(topPanel, BorderLayout.NORTH);
+		mainPanel.add(topPanel, BorderLayout.PAGE_START);
 	}
 
 	public GUI() throws IOException {
@@ -125,15 +124,15 @@ public class GUI {
 		createMainPanel();
 		createTopPanel();
 		createBottomPanel();
+		createBottomPanelScroll();
 		
 		addComboBox();
 		addButton();
-		//addScrollPanel();
-		//addTextArea();
+		addTextArea();
 		
 		loadValuesInComboBox();
 		
-		//bindAction();
+		bindAction();
 	}
 	
 	private void loadValuesInComboBox() {
