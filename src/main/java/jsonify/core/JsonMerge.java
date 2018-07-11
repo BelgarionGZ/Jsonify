@@ -14,18 +14,20 @@ public class JsonMerge {
 		List<Asset> aux = new ArrayList<Asset>();
 		String resultJson = new String();
 
-		List<Asset> firstList = JsonConverter.convertFromJson(json1, new TypeToken<List<Asset>>() {}.getType());
-		List<Asset> secondList = JsonConverter.convertFromJson(json2, new TypeToken<List<Asset>>() {}.getType());
-	
-		if (firstList != null && secondList != null && !firstList.isEmpty() && !secondList.isEmpty()) {
+		List<Asset> firstList = JsonConverter.convertFromJson(json1, new TypeToken<List<Asset>>() {
+		}.getType());
+		List<Asset> secondList = JsonConverter.convertFromJson(json2, new TypeToken<List<Asset>>() {
+		}.getType());
+
+		if (firstList != null && !firstList.isEmpty()) {
 			aux.addAll(firstList);
+		}
+
+		if (secondList != null && !secondList.isEmpty()) {
 			aux.addAll(secondList);
-			resultJson = new Gson().toJson(aux);
-		} else if(firstList != null && !firstList.isEmpty()) {
-			aux.addAll(firstList);
-			resultJson = new Gson().toJson(aux);
-		} else if(secondList != null && !secondList.isEmpty()) {
-			aux.addAll(secondList);
+		}
+
+		if (aux != null && !aux.isEmpty()) {
 			resultJson = new Gson().toJson(aux);
 		}
 

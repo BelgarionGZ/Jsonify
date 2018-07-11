@@ -1,12 +1,16 @@
 package jsonify.gui;
 
 import java.awt.BorderLayout;
+import java.awt.Color;
 import java.awt.EventQueue;
-import java.awt.FlowLayout;
-import java.awt.GridLayout;
+import java.awt.GridBagConstraints;
+import java.awt.GridBagLayout;
+import java.awt.Insets;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.io.IOException;
+import java.util.Arrays;
+import java.util.List;
 
 import javax.swing.BorderFactory;
 import javax.swing.JButton;
@@ -15,12 +19,17 @@ import javax.swing.JFrame;
 import javax.swing.JPanel;
 import javax.swing.JScrollPane;
 import javax.swing.JTextArea;
+import javax.swing.border.Border;
+import javax.swing.border.CompoundBorder;
 
-import jsonify.core.JsonCrawler;
+import org.apache.log4j.Logger;
+
+import jsonify.monitors.InfoMonitor;
 import jsonify.utils.Settings;
 import jsonify.utils.SettingsSingleton;
 
 public class GUI {
+	private final static Logger logger = Logger.getLogger(GUI.class);
 	private JButton button;
 	private JComboBox<String> comboBox;
 	private JFrame frame;
@@ -29,30 +38,43 @@ public class GUI {
 	private JPanel topPanel;
 	private JScrollPane scrollPanel;
 	private JTextArea textArea;
-	private Settings settings;
-	
+	private static Settings settings;
+
 	private void addButton() {
 		button = new JButton("GO");
-		
-		topPanel.add(button);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 1;
+		c.gridy = 0;
+		c.insets = new Insets(5, 5, 5, 5);
+		c.weightx = 0.1;
+
+		topPanel.add(button, c);
 	}
-	
+
 	private void addComboBox() {
 		comboBox = new JComboBox<String>();
 		comboBox.setMaximumSize(comboBox.getPreferredSize());
-		
-		topPanel.add(comboBox);
+
+		GridBagConstraints c = new GridBagConstraints();
+		c.fill = GridBagConstraints.HORIZONTAL;
+		c.gridx = 0;
+		c.gridy = 0;
+		c.insets = new Insets(5, 5, 5, 5);
+		c.weightx = 0.9;
+
+		topPanel.add(comboBox, c);
 	}
-	
+
 	private void addTextArea() {
 		textArea = new JTextArea();
 		textArea.setLineWrap(true);
 		textArea.setWrapStyleWord(true);
-		textArea.setText("Lorem Ipsum is simply dummy text of the printing and typesetting industry. Lorem Ipsum has been the industry's standard dummy text ever since the 1500s, when an unknown printer took a galley of type and scrambled it to make a type specimen book. It has survived not only five centuries, but also the leap into electronic typesetting, remaining essentially unchanged. It was popularised in the 1960s with the release of Letraset sheets containing Lorem Ipsum passages, and more recently with desktop publishing software like Aldus PageMaker including versions of Lorem Ipsum.");
-	
-		bottomPanel.add(textArea);
+
+		bottomPanel.add(textArea, BorderLayout.CENTER);
 	}
-	
+
 	public static void begin() {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
@@ -60,52 +82,55 @@ public class GUI {
 					GUI window = new GUI();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
-					e.printStackTrace();
+					logger.warn("ERROR: " + e);
 				}
 			}
 		});
 	}
-	
+
 	private void bindAction() {
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String result = new String();
-				
-				try {
-					String site = (String) comboBox.getSelectedItem();
-					result = JsonCrawler.gatherJsonAndMerge(settings.getProperty("URL") + site);
-				} catch (Exception e1) {
-					e1.printStackTrace();
-				}
-				
-				textArea.setText(result);
+				String siteSelected = (String) comboBox.getSelectedItem();
+				InfoMonitor infoMonitor = new InfoMonitor(textArea, siteSelected);
+				infoMonitor.start();
 			}
 		});
 	}
-	
+
 	private void createBottomPanel() {
 		bottomPanel = new JPanel();
-		bottomPanel.setLayout(new GridLayout());
+		bottomPanel.setLayout(new BorderLayout());
 	}
-	
+
 	private void createBottomPanelScroll() {
-		scrollPanel = new JScrollPane(bottomPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED, JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		Border border = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1);
+		Border margin = BorderFactory.createEmptyBorder(5, 2, 0, 2);
+
+		scrollPanel = new JScrollPane(bottomPanel, JScrollPane.VERTICAL_SCROLLBAR_AS_NEEDED,
+				JScrollPane.HORIZONTAL_SCROLLBAR_NEVER);
+		scrollPanel.setBorder(new CompoundBorder(margin, border));
+
 		mainPanel.add(scrollPanel, BorderLayout.CENTER);
 	}
-	
+
 	private void createMainPanel() {
 		mainPanel = new JPanel();
 		mainPanel.setBorder(BorderFactory.createEmptyBorder(10, 10, 10, 10));
 		mainPanel.setLayout(new BorderLayout());
-		
+
 		frame.add(mainPanel);
 	}
-	
+
 	private void createTopPanel() {
+		Border aux = BorderFactory.createLineBorder(Color.LIGHT_GRAY, 1);
+		Border border = BorderFactory.createTitledBorder(aux, "Select site");
+		Border margin = BorderFactory.createEmptyBorder(0, 0, 5, 0);
+
 		topPanel = new JPanel();
-		topPanel.setBorder(BorderFactory.createTitledBorder("Select site"));
-		topPanel.setLayout(new FlowLayout());
-		
+		topPanel.setBorder(new CompoundBorder(margin, border));
+		topPanel.setLayout(new GridBagLayout());
+
 		mainPanel.add(topPanel, BorderLayout.PAGE_START);
 	}
 
@@ -115,31 +140,35 @@ public class GUI {
 
 	private void initialize() throws IOException {
 		settings = SettingsSingleton.getInstance();
-		
+
 		frame = new JFrame();
 		frame.setBounds(100, 100, 450, 300);
 		frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frame.setTitle("Jsonify");
-		
+
 		createMainPanel();
 		createTopPanel();
 		createBottomPanel();
 		createBottomPanelScroll();
-		
+
 		addComboBox();
 		addButton();
 		addTextArea();
-		
+
 		loadValuesInComboBox();
-		
+
 		bindAction();
 	}
-	
+
 	private void loadValuesInComboBox() {
 		String sitesAvailable = settings.getProperty("SITES_AVAILABLE");
-		String[] sitesAvailableArray = sitesAvailable.split(",");
-		
-		for(String site : sitesAvailableArray) {
+		List<String> sitesAvailableArray = Arrays.asList(sitesAvailable.split(","));
+
+		if (sitesAvailableArray.size() > 0) {
+			comboBox.addItem("ALL");
+		}
+
+		for (String site : sitesAvailableArray) {
 			comboBox.addItem(site);
 		}
 	}
