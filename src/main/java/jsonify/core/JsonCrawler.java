@@ -32,7 +32,10 @@ public class JsonCrawler {
 		Integer failedRequestMax = Integer.parseInt(settings.getProperty("FAILED_REQUEST"));
 		List<Asset> jsonAuxList = null;
 		List<String> sitesAvailableArray = null;
+		Set<String> assetIds = new HashSet<String>();
 		Set<String> firstLevelCategories = new HashSet<String>();
+		String assetId = new String();
+		String firstLevelCategory = new String();
 		String jsonAux = new String();
 		String jsonToStore = new String();
 		String sitesAvailable = new String();
@@ -50,6 +53,7 @@ public class JsonCrawler {
 		textArea.append("Beginning" + "\n");
 
 		for (String siteAux : sitesAvailableArray) {
+			assetIds = new HashSet<String>();
 			counter = 1;
 			failedRequestInARow = 0;
 			jsonAux = new String();
@@ -59,9 +63,13 @@ public class JsonCrawler {
 			textArea.append("Beginning site: " + siteAux + "\n");
 
 			do {
+				assetId = new String();
+				firstLevelCategory = new String();
+
 				urlAux = url.concat(siteAux).concat(String.format("&desde=%d&hasta=%d", counter, counter));
 
-				textArea.append("[" + DateUtils.getCurrentLocalDateTimeStamp() + "]" + " ----- " + "Processing site: " + siteAux + " ----- " + "Element: " + counter + "\n");
+				textArea.append("[" + DateUtils.getCurrentLocalDateTimeStamp() + "]" + " ----- " + "Processing site: "
+						+ siteAux + " ----- " + "Element: " + counter + "\n");
 				textArea.update(textArea.getGraphics());
 
 				logger.info("Processing URL: " + urlAux);
@@ -79,23 +87,33 @@ public class JsonCrawler {
 					}.getType());
 
 					for (Asset asset : jsonAuxList) {
-						String firstLevelCategory = asset.getCategoriaPrimerNivel();
+						assetId = asset.getAssetid();
+						firstLevelCategory = asset.getCategoriaPrimerNivel();
 
 						if (firstLevelCategory != null && !firstLevelCategory.isEmpty()) {
 							firstLevelCategories.add(firstLevelCategory);
 						}
 					}
 
-					jsonToStore = JsonMerge.mergeJSONObjects(jsonAux, jsonToStore);
+					if (assetIds != null && assetId != null && !assetId.isEmpty()) {
+						if (!assetIds.contains(assetId)) {
+							assetIds.add(assetId);
+							jsonToStore = JsonMerge.mergeJSONObjects(jsonAux, jsonToStore);
+						} else {
+							logger.info("Asset repeated: " + assetId);
+							textArea.append("Asset repeated: " + assetId + "\n");
+						}
+					}
 				}
 			} while (failedRequestInARow < failedRequestMax || (jsonAux != null && !jsonAux.isEmpty()));
 
-			if(failedRequestInARow >= failedRequestMax) {
+			if (failedRequestInARow >= failedRequestMax) {
 				WriteFile.write(jsonToStore, siteAux);
 			} else {
-				textArea.append("There was a problem getting site: " + siteAux);
+				textArea.append("There was a problem getting site: " + siteAux + "\n");
 			}
 			
+			textArea.append("Assets indexed: " + assetIds.size() + "\n");
 			textArea.append("Ending site: " + siteAux + "\n");
 		}
 
@@ -108,7 +126,6 @@ public class JsonCrawler {
 		WriteFile.write(firstLevelCategories.toString(), "FirstLevelCategories");
 
 		textArea.append("Ending first level categories: " + "\n");
-
 		textArea.append("Ending" + "\n");
 	}
 }

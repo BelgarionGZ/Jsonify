@@ -16,29 +16,29 @@ import org.apache.log4j.Logger;
 
 public class JsonGet {
 	private final static Logger logger = Logger.getLogger(JsonGet.class);
-	
+
 	public static String sendRequest(String url) throws ClientProtocolException, IOException {
 		String responseString = new String();
-		
+
 		HttpClient client = HttpClientBuilder.create().build();
 
 		HttpUriRequest request = new HttpGet(url);
 		request.addHeader(HttpHeaders.ACCEPT, "application/json");
-		
+
 		Integer counter = Integer.valueOf(0);
 		Integer statusCode = Integer.valueOf(0);
-		
+
 		HttpResponse response = null;
-		
+
 		do {
 			counter += 1;
 			logger.info("Attempt number: " + counter);
-			
+
 			response = client.execute(request);
 			statusCode = response.getStatusLine().getStatusCode();
-		} while(!statusCode.equals(HttpStatus.SC_OK) && counter < 5);
-		
-		if(statusCode.equals(HttpStatus.SC_OK)) {
+		} while (!statusCode.equals(HttpStatus.SC_OK) && counter < 5);
+
+		if (statusCode.equals(HttpStatus.SC_OK)) {
 			HttpEntity entity = response.getEntity();
 			responseString = EntityUtils.toString(entity).trim();
 		}
