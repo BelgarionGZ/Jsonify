@@ -82,7 +82,7 @@ public class GUI {
 					GUI window = new GUI();
 					window.frame.setVisible(true);
 				} catch (Exception e) {
-					logger.warn("ERROR: " + e);
+					logger.error("ERROR: " + e);
 				}
 			}
 		});

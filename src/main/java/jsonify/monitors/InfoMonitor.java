@@ -21,7 +21,7 @@ public class InfoMonitor extends Thread {
 		try {
 			JsonCrawler.gatherJsonAndMerge(textArea, site);
 		} catch (Exception e) {
-			logger.warn("ERROR: " + e);
+			logger.error("ERROR: " + e);
 		}
 	}
 }

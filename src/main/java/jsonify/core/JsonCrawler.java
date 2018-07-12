@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.reflect.TypeToken;
 
 import jsonify.entities.Asset;
+import jsonify.utils.DateUtils;
 import jsonify.utils.JsonConverter;
 import jsonify.utils.Settings;
 import jsonify.utils.SettingsSingleton;
@@ -60,10 +61,10 @@ public class JsonCrawler {
 			do {
 				urlAux = url.concat(siteAux).concat(String.format("&desde=%d&hasta=%d", counter, counter));
 
-				textArea.append("Processing site: " + siteAux + " ----- " + "Element: " + counter + "\n");
+				textArea.append("[" + DateUtils.getCurrentLocalDateTimeStamp() + "]" + " ----- " + "Processing site: " + siteAux + " ----- " + "Element: " + counter + "\n");
 				textArea.update(textArea.getGraphics());
 
-				logger.warn("Processing URL: " + urlAux);
+				logger.info("Processing URL: " + urlAux);
 
 				counter += 1;
 
@@ -89,9 +90,13 @@ public class JsonCrawler {
 				}
 			} while (failedRequestInARow < failedRequestMax || (jsonAux != null && !jsonAux.isEmpty()));
 
+			if(failedRequestInARow >= failedRequestMax) {
+				WriteFile.write(jsonToStore, siteAux);
+			} else {
+				textArea.append("There was a problem getting site: " + siteAux);
+			}
+			
 			textArea.append("Ending site: " + siteAux + "\n");
-
-			WriteFile.write(jsonToStore, siteAux);
 		}
 
 		textArea.append("Beginning first level categories: " + "\n");
