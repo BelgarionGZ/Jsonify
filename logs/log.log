@@ -1,0 +1,12 @@
+15:02:20,677  INFO JsonCrawler:45 - URL: 
+15:02:20,677  INFO JsonCrawler:46 - URL: 
+15:02:20,693  INFO JsonCrawler:47 - URL: 
+15:02:20,740  INFO JsonCrawler:79 - Processing URL: EMP&desde=1&hasta=1
+15:02:20,943  INFO JsonGet:51 - Attempt number: 1
+15:02:20,958 ERROR InfoMonitor:24 - ERROR: org.apache.http.client.ClientProtocolException
+15:02:43,922  INFO JsonCrawler:45 - URL: 
+15:02:43,922  INFO JsonCrawler:46 - URL: 
+15:02:43,922  INFO JsonCrawler:47 - URL: 
+15:02:43,969  INFO JsonCrawler:79 - Processing URL: EMP&desde=1&hasta=1
+15:02:44,203  INFO JsonGet:51 - Attempt number: 1
+15:02:44,203 ERROR InfoMonitor:24 - ERROR: org.apache.http.client.ClientProtocolException
