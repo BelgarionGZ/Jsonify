@@ -1,5 +1,7 @@
 package jsonify.monitors;
 
+import java.io.IOException;
+
 import javax.swing.JTextArea;
 
 import org.apache.log4j.Logger;
@@ -20,7 +22,7 @@ public class InfoMonitor extends Thread {
 	public void run() {
 		try {
 			JsonCrawler.gatherJsonAndMerge(textArea, site);
-		} catch (Exception e) {
+		} catch (IOException e) {
 			logger.error("ERROR: " + e);
 		}
 	}

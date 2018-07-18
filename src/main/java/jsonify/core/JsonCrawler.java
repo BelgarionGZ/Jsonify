@@ -28,8 +28,8 @@ public class JsonCrawler {
 		settings = SettingsSingleton.getInstance();
 
 		Integer counter = 1;
-		Integer failedRequestInARow = 0;
-		Integer failedRequestMax = Integer.parseInt(settings.getProperty("FAILED_REQUEST"));
+		Integer emptyRequestsInARow = 0;
+		Integer extraRequestsToDetectEnd = Integer.parseInt(settings.getProperty("EXTRA_REQUESTS_TO_DETECT_END"));
 		List<Asset> jsonAuxList = null;
 		List<String> sitesAvailableArray = null;
 		Set<String> assetIds = new HashSet<String>();
@@ -55,7 +55,7 @@ public class JsonCrawler {
 		for (String siteAux : sitesAvailableArray) {
 			assetIds = new HashSet<String>();
 			counter = 1;
-			failedRequestInARow = 0;
+			emptyRequestsInARow = 0;
 			jsonAux = new String();
 			jsonToStore = new String();
 			urlAux = new String();
@@ -79,9 +79,9 @@ public class JsonCrawler {
 				jsonAux = JsonGet.sendRequest(urlAux);
 
 				if (jsonAux == null || jsonAux.isEmpty()) {
-					failedRequestInARow += 1;
+					emptyRequestsInARow += 1;
 				} else {
-					failedRequestInARow = 0;
+					emptyRequestsInARow = 0;
 
 					jsonAuxList = JsonConverter.convertFromJson(jsonAux, new TypeToken<List<Asset>>() {
 					}.getType());
@@ -105,14 +105,14 @@ public class JsonCrawler {
 						}
 					}
 				}
-			} while (failedRequestInARow < failedRequestMax || (jsonAux != null && !jsonAux.isEmpty()));
+			} while (emptyRequestsInARow < extraRequestsToDetectEnd);
 
-			if (failedRequestInARow >= failedRequestMax) {
+			if (emptyRequestsInARow >= extraRequestsToDetectEnd) {
 				WriteFile.write(jsonToStore, siteAux);
 			} else {
 				textArea.append("There was a problem getting site: " + siteAux + "\n");
 			}
-			
+
 			textArea.append("Assets indexed: " + assetIds.size() + "\n");
 			textArea.append("Ending site: " + siteAux + "\n");
 		}
