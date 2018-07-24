@@ -14,6 +14,7 @@ import org.apache.log4j.Logger;
 import com.google.gson.reflect.TypeToken;
 
 import jsonify.entities.Asset;
+import jsonify.entities.KO;
 import jsonify.utils.DateUtils;
 import jsonify.utils.JsonConverter;
 import jsonify.utils.Settings;
@@ -27,9 +28,11 @@ public class JsonCrawler {
 	public static void gatherJsonAndMerge(JTextArea textArea, String site) throws IOException {
 		settings = SettingsSingleton.getInstance();
 
+		Boolean ko = false;
 		Integer counter = 1;
 		Integer emptyRequestsInARow = 0;
 		Integer extraRequestsToDetectEnd = Integer.parseInt(settings.getProperty("EXTRA_REQUESTS_TO_DETECT_END"));
+		KO jsonAuxKO = null;
 		List<Asset> jsonAuxList = null;
 		List<String> sitesAvailableArray = null;
 		Set<String> assetIds = new HashSet<String>();
@@ -58,6 +61,7 @@ public class JsonCrawler {
 			emptyRequestsInARow = 0;
 			jsonAux = new String();
 			jsonToStore = new String();
+			ko = false;
 			urlAux = new String();
 
 			textArea.append("Beginning site: " + siteAux + "\n");
@@ -78,7 +82,15 @@ public class JsonCrawler {
 
 				jsonAux = JsonGet.sendRequest(urlAux);
 
-				if (jsonAux == null || jsonAux.isEmpty()) {
+				try {
+					jsonAuxKO = JsonConverter.convertFromJson(jsonAux, new TypeToken<KO>() {
+					}.getType());
+					ko = jsonAuxKO.getResponse().getStatus().equals("KO");
+				} catch (Exception e) {
+					ko = false;
+				}
+
+				if (jsonAux == null || jsonAux.isEmpty() || ko) {
 					emptyRequestsInARow += 1;
 				} else {
 					emptyRequestsInARow = 0;
