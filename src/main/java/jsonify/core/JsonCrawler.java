@@ -30,14 +30,13 @@ public class JsonCrawler {
 
 		Boolean ko = false;
 		Integer counter = 1;
+		Integer counterAssetIds = 0;
 		Integer emptyRequestsInARow = 0;
 		Integer extraRequestsToDetectEnd = Integer.parseInt(settings.getProperty("EXTRA_REQUESTS_TO_DETECT_END"));
 		KO jsonAuxKO = null;
 		List<Asset> jsonAuxList = null;
 		List<String> sitesAvailableArray = null;
-		Set<String> assetIds = new HashSet<String>();
 		Set<String> firstLevelCategories = new HashSet<String>();
-		String assetId = new String();
 		String firstLevelCategory = new String();
 		String jsonAux = new String();
 		String jsonToStore = new String();
@@ -56,8 +55,8 @@ public class JsonCrawler {
 		textArea.append("Beginning" + "\n");
 
 		for (String siteAux : sitesAvailableArray) {
-			assetIds = new HashSet<String>();
 			counter = 1;
+			counterAssetIds = 0;
 			emptyRequestsInARow = 0;
 			jsonAux = new String();
 			jsonToStore = new String();
@@ -67,7 +66,6 @@ public class JsonCrawler {
 			textArea.append("Beginning site: " + siteAux + "\n");
 
 			do {
-				assetId = new String();
 				firstLevelCategory = new String();
 
 				urlAux = url.concat(siteAux).concat(String.format("&desde=%d&hasta=%d", counter, counter));
@@ -99,7 +97,6 @@ public class JsonCrawler {
 					}.getType());
 
 					for (Asset asset : jsonAuxList) {
-						assetId = asset.getAssetid();
 						firstLevelCategory = asset.getCategoriaPrimerNivel();
 
 						if (firstLevelCategory != null && !firstLevelCategory.isEmpty()) {
@@ -107,15 +104,9 @@ public class JsonCrawler {
 						}
 					}
 
-					if (assetIds != null && assetId != null && !assetId.isEmpty()) {
-						if (!assetIds.contains(assetId)) {
-							assetIds.add(assetId);
-							jsonToStore = JsonMerge.mergeJSONObjects(jsonAux, jsonToStore);
-						} else {
-							logger.info("Asset repeated: " + assetId);
-							textArea.append("Asset repeated: " + assetId + "\n");
-						}
-					}
+					jsonToStore = JsonMerge.mergeJSONObjects(jsonAux, jsonToStore);
+					
+					counterAssetIds += 1;
 				}
 			} while (emptyRequestsInARow < extraRequestsToDetectEnd);
 
@@ -125,7 +116,7 @@ public class JsonCrawler {
 				textArea.append("There was a problem getting site: " + siteAux + "\n");
 			}
 
-			textArea.append("Assets indexed: " + assetIds.size() + "\n");
+			textArea.append("Assets indexed: " + counterAssetIds + "\n");
 			textArea.append("Ending site: " + siteAux + "\n");
 		}
 
